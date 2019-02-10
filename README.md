@@ -1,6 +1,5 @@
 ## Load libraries
 
-
 library(tidyverse)
 library(spotifyr)
 library(devtools)
