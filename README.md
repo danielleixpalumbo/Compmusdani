@@ -1,4 +1,4 @@
-## Load libraries
+# Load libraries
 
 library(tidyverse)
 library(spotifyr)
@@ -6,7 +6,7 @@ library(devtools)
 library(ggplot2)
 library(dplyr)
 
-## Spotify access variables 
+# Spotify access variables 
 
 Sys.setenv(SPOTIFY_CLIENT_ID = '8e7bf977224b414d8e6b255352c63b5a')
 Sys.setenv(SPOTIFY_CLIENT_SECRET = '1b2f3f287a724da8b6ed562dbf4d99e1')
