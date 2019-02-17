@@ -39,6 +39,8 @@ ggplot() + scale_x_log10 ()+
   geom_point(data=HipHop_90s, aes(x = instrumentalness, y = acousticness), color='red') +
   geom_point(data=HipHop_today, aes(x = instrumentalness, y = acousticness)) 
 
+![Visualisation](Rplot.png)
+
 # Description of the Project 
 
 How does hip-hop from the 1990s differ from hip-hop today? With the aim to answer to this question, I decided to look for reliable playlists on Spotify through which I could gain valuable insight into the most remarkable differences within and between the two time periods. In order to do so, I chose as corpus of data two playlists, namely "Hip Hop 90s" from "Hip Hop Heroes" and "Hip Hop 2019: Top100 Rap HITS 2019 / Rap 2019 New Hip Hop Songs" from "Filtr Espana", and I decided to analyse them and to compare their key features. These two playlists were chosen since they presented similar features in terms of number of followers and number of tracks, and also they contained tracks from the most famous and representative artists of the two time periods.
