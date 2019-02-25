@@ -265,7 +265,7 @@ Endless %>%
     geom_tile() +
     labs(x = 'Time (s)', y = NULL, fill = 'Magnitude') +
     theme_minimal()
-ggplotly()
+ggplotly(Endless)
 ```
 
 ***
