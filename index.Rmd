@@ -6,6 +6,7 @@ output:
    flexdashboard::flex_dashboard:
        storyboard: true
        theme: lumen
+       vertical_layout: scroll 
 ---
 
 `r knitr::opts_chunk$set(cache = TRUE)`
