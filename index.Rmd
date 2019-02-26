@@ -272,4 +272,6 @@ ggplotly()
 
 ***
 
-Annotations of the piece's key moments will be provided tomorrow. (The chromagram should be interactive, as it outputs on rstudio but when i knit it into html then it turns static). 
+Finally, it has been decided to analyse through a chromagram the different key moment by pitch of one of the outlier present in the corpus, namely "Endless Summer Freestyle" by G-Eazy ft. YG. As it can be noticed in the chromagram, during the first 13 seconds of intro, in which only the backing track is playing (that is a sample of the song ""Neki-Hokey" by The Cleftones), there's really low energy distributed across the different pitch bands, probably also because of the "artistic" use of a filter for attenuating some frequency ranges. After the intro, voice and drums start to play and the distribution of energy is then equally distributed between C and C ♯ across all the track without any remarkable variation, maintaining a magnitude which may vary from 0,2 to 0,6. In fact, even if the track in question is from the today's corpus, its structure is pretty monotonous and without any chorus or change, reflecting rather the features of a more classical 90's Hip Hop song. 
+Another remarkable feature to be noticed is the bass playing each fourth measure of the track, reflected by the regular peaks of magnitude ( about 0,5) on the A pitch band in the chromagram. 
+Lastly, there's almost no energy distributed during the break from 165 (s) and 172 (s) and the end of the track, starting from 316 (s) where there's only voice.  
