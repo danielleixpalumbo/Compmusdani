@@ -275,3 +275,46 @@ ggplotly()
 Finally, it has been decided to analyse through a chromagram the different key moment by pitch of one of the outlier present in the corpus, namely "Endless Summer Freestyle" by G-Eazy ft. YG. As it can be noticed in the chromagram, during the first 13 seconds of intro, in which only the backing track is playing (that is a sample of the song ""Neki-Hokey" by The Cleftones), there's really low energy distributed across the different pitch bands, probably also because of the "artistic" use of a filter for attenuating some frequency ranges. After the intro, voice and drums start to play and the distribution of energy is then equally distributed between C and C ♯ across all the track without any remarkable variation, maintaining a magnitude which may vary from 0,2 to 0,6. In fact, even if the track in question is from the today's corpus, its structure is pretty monotonous and without any chorus or change, reflecting rather the features of a more classical 90's Hip Hop song. 
 Another remarkable feature to be noticed is the bass playing each fourth measure of the track, reflected by the regular peaks of magnitude ( about 0,5) on the A pitch band in the chromagram. 
 Lastly, there's almost no energy distributed during the break from 165 (s) and 172 (s) and the end of the track, starting from 316 (s) where there's only voice.  
+
+### Understanding of the structure of "The choise is yours" through an analysis of chroma and timbre features
+
+```{r}
+BlackSheep <- 
+    get_tidy_audio_analysis('0cbodmgjBx4IVPOIyl3F4b') %>% 
+    compmus_align(bars, segments) %>% 
+    select(bars) %>% unnest(bars) %>% 
+    mutate(
+        pitches = 
+            map(segments, 
+                compmus_summarise, pitches, 
+                method = 'rms', norm = 'euclidean')) %>% 
+    mutate(
+        timbre = 
+            map(segments, 
+                compmus_summarise, timbre, 
+                method = 'rms'))
+BlackSheepplot <- 
+    bind_rows(
+        BlackSheep %>% compmus_self_similarity(pitches, 'angular') %>% mutate(d = d / max(d), type = "Chroma"),
+        BlackSheep %>% compmus_self_similarity(timbre, 'cosine') %>% mutate(d = d / max(d), type = "Timbre")) %>% 
+    ggplot(
+        aes(
+            x = xstart + xduration / 5, 
+            width = xduration,
+            y = ystart + yduration / 5,
+            height = yduration,
+            fill = d)) + 
+    geom_tile() +
+    coord_fixed() +
+    facet_wrap(~ type) +
+    scale_fill_viridis_c(option = 'E', guide = 'none') +
+    theme_classic() +
+    labs(x = '', y = '')
+ggplotly(BlackSheepplot)
+```
+
+***
+
+In this 4th section of the project the structure of the 90s Hip Hop true classic "The Choise is yours" by Black Sheep is analysed by comparing the chroma-based and timbre-based self-similarity matrices. 
+As Hip Hop tracks tend to be pretty homogeneous in their structure, also "The Choise is yours" follows the same trend, by fundamentally showing two main sections in its structural layout, which could be named in this case as kind of verse and chorus. The alternation of the two sections is not well visible in the chroma-based matrix, as there are no great variations in terms of pitches across the entire song. 
+In contrast, the timbre-based matrix makes this alternation much more visible, as the switch to the different part of the song is highlighted by the presense or the absence of certain instruments: the verse is charachterised by the well-known double bass riff, while in the chorus only voices and drums are present.
