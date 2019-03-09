@@ -9,17 +9,22 @@ output:
        vertical_layout: scroll 
 ---
 
-`r knitr::opts_chunk$set(cache = TRUE)`
-
 ```{r, cache = FALSE}
+
+devtools::install_github('charlie86/spotifyr')
+devtools::install_github('jaburgoyne/compmus')
+
 library(tidyverse)
 library(spotifyr)
 library(plotly)
+library(compmus)
 
 # Spotify access variables 
 
 Sys.setenv(SPOTIFY_CLIENT_ID = '8e7bf977224b414d8e6b255352c63b5a')
 Sys.setenv(SPOTIFY_CLIENT_SECRET = '1b2f3f287a724da8b6ed562dbf4d99e1')
+
+access_token <- get_spotify_access_token()
 ```
 
 ### Introduction 
@@ -80,194 +85,74 @@ The values of speechiness are slightly higher for the 90's tracks, demonstrating
 
 Finally, as it can be observed in the scatterplot the dots are coloured by "mode", but in both playlist it has been found a certain balance between songs in major and in minor and there's no remarkable trend to be noticed. The increasing acceleration of today's Hip Hop tracks appear to be at the moment the most interesting finding.
 
-```{r}
-#' Get a tidy audio analysis from Spotify.
-#'
-#' spotifyr returns Spotify's audio analysis as a large list. This function
-#' uses list columns to create a structure that works more richly within the
-#' tidyverse.
-get_tidy_audio_analysis <- function(track_uri, ...) 
-{
-    get_track_audio_analysis(track_uri, ...) %>% 
-        list %>% transpose %>% as_tibble %>% 
-        mutate_at(vars(meta, track), . %>% map(as_tibble)) %>% 
-        unnest(meta, track) %>% 
-        select(
-            analyzer_version,
-            duration,
-            contains('fade'),
-            ends_with('confidence'),
-            bars:segments) %>% 
-        mutate_at(
-            vars(bars, beats, tatums, sections), 
-            . %>% map(bind_rows)) %>% 
-        mutate(
-            segments =
-                map(
-                    segments,
-                    . %>% 
-                        transpose %>% as_tibble %>% 
-                        unnest(.preserve = c(pitches, timbre)) %>% 
-                        mutate(
-                            pitches = 
-                                map(
-                                    pitches, 
-                                    . %>% 
-                                        flatten_dbl %>% 
-                                        set_names(
-                                            c( 
-                                                'C', 'C#|Db', 'D', 'D#|Eb', 
-                                                'E', 'F', 'F#|Gb', 'G',
-                                                'G#|Ab', 'A', 'A#|Bb', 'B'))),
-                            timbre = 
-                                map(
-                                    timbre,
-                                    . %>% 
-                                        flatten_dbl %>% 
-                                        set_names(
-                                            c(
-                                                'c1', 'c2', 'c3', 'c4', 
-                                                'c5', 'c6', 'c7', 'c8',
-                                                'c9', 'c10', 'c11', 'c12'))))))
-}
-```
-
+### The use of samples in 90's Hip-Hop, a closer look to "He got game"
 
 ```{r}
-#' Normalise vectors for Computational Musicology.
-#'
-#' We use a number of normalisation strategies in Computational Musicology.
-#' This function brings them together into one place, along with common
-#' alternative names.
-compmus_normalise <- compmus_normalize <- function(v, method = "euclidean")
-{
-    ## Supported functions
-    
-    harmonic  <- function(v) v * sum(1 / abs(v))
-    manhattan <- function(v) v / sum(abs(v))
-    euclidean <- function(v) v / sqrt(sum(v^2))
-    chebyshev <- function(v) v / max(abs(v))
-    clr       <- function(v) {lv <- log(v); lv - mean(lv)}
-    
-    ## Method aliases
-    
-    METHODS <-
-        list(
-            harmonic  = harmonic,
-            manhattan = manhattan,
-            L1        = manhattan,
-            euclidean = euclidean,
-            L2        = euclidean,
-            chebyshev = chebyshev,
-            maximum   = chebyshev,
-            aitchison = clr,
-            clr       = clr)
-    
-    ## Function selection
-    
-
-    if (!is.na(i <- pmatch(method, names(METHODS))))
-        METHODS[[i]](v)
-    else 
-        stop('The method name is ambiguous or the method is unsupported.')
-}
-
-#' Compute pairwise distances for Computational Musicology in long format.
-#'
-#' We use a number of distance measures in Computational Musicology.
-#' This function brings them together into one place, along with common
-#' alternative names. It is designed for convenience, not speed.
-compmus_long_distance <- function(xdat, ydat, feature, method = "euclidean")
-{
-    
-    feature <- enquo(feature)
-    
-    ## Supported functions
-    
-    manhattan <- function(x, y) sum(abs(x - y))
-    euclidean <- function(x, y) sqrt(sum((x - y) ^ 2))
-    chebyshev <- function(x, y) max(abs(x - y))
-    pearson   <- function(x, y) 1 - cor(x, y)
-    cosine    <- function(x, y)
-    {
-        1 - sum(compmus_normalise(x, "euc") * compmus_normalise(y, "euc"))
-    }
-    angular   <- function(x, y) 2 * acos(1 - cosine(x, y)) / pi
-    aitchison <- function(x, y)
-    {
-        euclidean(compmus_normalise(x, "clr"), compmus_normalise(y, "clr"))
-    }
-    
-    ## Method aliases
-    
-    METHODS <-
-        list(
-            manhattan   = manhattan,
-            cityblock   = manhattan,
-            taxicab     = manhattan,
-            L1          = manhattan,
-            totvar      = manhattan,
-            euclidean   = euclidean,
-            L2          = euclidean,
-            chebyshev   = chebyshev,
-            maximum     = chebyshev,
-            pearson     = pearson,
-            correlation = pearson,
-            cosine      = cosine,
-            angular     = angular,
-            aitchison   = aitchison)
-    
-    ## Function selection
-    
-    if (!is.na(i <- pmatch(method, names(METHODS))))
-        bind_cols(
-            crossing(
-                xdat %>% select(xstart = start, xduration = duration),
-                ydat %>% select(ystart = start, yduration = duration)),
-            xdat %>% select(x = !!feature) %>% 
-                crossing(ydat %>% select(y = !!feature)) %>% 
-                transmute(d = map2_dbl(x, y, METHODS[[i]])))
-    else 
-        stop('The method name is ambiguous or the method is unsupported.')
-}
-```
-
-### Chromagram of the song "Endless Summer Freestyle"
-
-```{r}
-#' Gathers chroma vectors into long format.
-#'
-#' Gathers chroma vectors into long format for Computational Musicology.
-compmus_gather_chroma <- function(data)
-{
-    data %>% 
-    mutate(pitches = map(pitches, bind_rows)) %>% unnest(pitches) %>% 
-    gather("pitch_class", "value", C:B) %>% 
-    mutate(pitch_class = fct_shift(factor(pitch_class), 3))
-}
-```
-
-```{r}
-Endless <- 
-    get_tidy_audio_analysis('6yxYCurtUz8MOAgWGxlAzP') %>% 
+HeGotGame <- 
+    get_tidy_audio_analysis('7aRGb3vZGMLNpK2PEdUjdA') %>% 
     select(segments) %>% unnest(segments) %>% 
     select(start, duration, pitches)
+ForWhat <- 
+    get_tidy_audio_analysis('1qRA5BS78u3gME0loMl9AA') %>% 
+    select(segments) %>% unnest(segments) %>% 
+    select(start, duration, pitches)
+TodayHipHop_dist <- 
+    compmus_long_distance(
+    HeGotGame %>% mutate(pitches = map(pitches, compmus_normalise, 'manhattan')),
+    ForWhat %>% mutate(pitches = map(pitches, compmus_normalise, 'manhattan')),
+    feature = pitches,
+    method = 'aitchison')
 ```
 
+
 ```{r}
-Endless %>% 
-    mutate(pitches = map(pitches, compmus_normalise, 'manhattan')) %>% 
-    compmus_gather_chroma %>% 
+TodayHipHop <- 
+   TodayHipHop_dist %>% 
+    mutate(
+        HeGotGame = xstart + xduration / 2, 
+        ForWhat = ystart + yduration / 2) %>% 
     ggplot(
         aes(
-            x = start + duration / 2, 
-            width = duration, 
-            y = pitch_class, 
-            fill = value)) + 
-    geom_tile() +
-    labs(x = 'Time (s)', y = NULL, fill = 'Magnitude') +
-    theme_minimal()
-ggplotly()
+            x = HeGotGame,
+            y = ForWhat,
+            fill = d)) + 
+    geom_tile(aes(width = xduration, height = yduration)) +
+    coord_fixed() +
+    scale_x_continuous(
+        breaks = c(0, 59, 79, 128, 148, 158, 197, 217, 286), 
+        labels = 
+            c(
+                'Verse',
+                'Chorus',
+                'Verse2',
+                'Chorus2',
+                'Bridge',
+                'OriginalTrackChorus',
+                'Special',
+                'FinalVerse',
+                ''),
+        ) +
+    scale_y_continuous(
+        breaks = c(0, 28, 34, 63, 69, 78, 97, 102, 112, 131, 153), 
+        labels = 
+            c(
+                'Verse',
+                'Chorus',
+                'Verse2',
+                'Chorus2',
+                'Bridge',
+                'Verse3',
+                'Chorus3',
+                'Bridge2' ,
+                'Special' ,
+                'Chorus4' , 
+              ''),
+        ) +
+    scale_fill_viridis_c(option = 'E', guide = "none") +
+    theme_classic() + 
+    theme(axis.text.x = element_text(angle = 30, hjust = 1)) +
+    labs(x = 'He Got Game', y = 'For What it s Worth')
+TodayHipHop
 ```
 
 ***
@@ -275,6 +160,109 @@ ggplotly()
 Finally, it has been decided to analyse through a chromagram the different key moment by pitch of one of the outlier present in the corpus, namely "Endless Summer Freestyle" by G-Eazy ft. YG. As it can be noticed in the chromagram, during the first 13 seconds of intro, in which only the backing track is playing (that is a sample of the song ""Neki-Hokey" by The Cleftones), there's really low energy distributed across the different pitch bands, probably also because of the "artistic" use of a filter for attenuating some frequency ranges. After the intro, voice and drums start to play and the distribution of energy is then equally distributed between C and C ♯ across all the track without any remarkable variation, maintaining a magnitude which may vary from 0,2 to 0,6. In fact, even if the track in question is from the today's corpus, its structure is pretty monotonous and without any chorus or change, reflecting rather the features of a more classical 90's Hip Hop song. 
 Another remarkable feature to be noticed is the bass playing each fourth measure of the track, reflected by the regular peaks of magnitude ( about 0,5) on the A pitch band in the chromagram. 
 Lastly, there's almost no energy distributed during the break from 165 (s) and 172 (s) and the end of the track, starting from 316 (s) where there's only voice.  
+
+```{r}
+TodayHipHop_hist <- 
+    TodayHipHop_dist %>% 
+    ggplot(aes(x = d)) +
+    geom_histogram(binwidth = 0.5) +
+    theme_classic() + 
+    theme(
+        axis.line.y = element_blank(), 
+        axis.ticks.y = element_blank(),
+        axis.text.y = element_blank()) +
+    scale_x_continuous(breaks = c(0.7, 4.4, 5.5, 6.8, 14.2)) +
+    labs(x = 'Aitchison Distance', y = '')
+ggsave("compmus-HeGotGame.png", TodayHipHop_hist, width = 3, height = 2, dpi = 'screen')
+```
+
+![](compmus-HeGotGame.png)
+
+### How is changed the use of samples in today's Hip-Hop? Let's take "Endless Summer Freestyle" as benchmark for our comparison
+
+```{r}
+Endless <- 
+    get_tidy_audio_analysis('6yxYCurtUz8MOAgWGxlAzP') %>% 
+    select(segments) %>% unnest(segments) %>% 
+    select(start, duration, pitches)
+Neky_Hokey <- 
+    get_tidy_audio_analysis('0DelTitHNIJ8uUBpGpT0Hk') %>% 
+    select(segments) %>% unnest(segments) %>% 
+    select(start, duration, pitches)
+OldHipHop_dist <- 
+    compmus_long_distance(
+    Endless %>% mutate(pitches = map(pitches, compmus_normalise, 'manhattan')),
+    Neky_Hokey %>% mutate(pitches = map(pitches, compmus_normalise, 'manhattan')),
+    feature = pitches,
+    method = 'aitchison')
+```
+
+
+```{r}
+OldHipHop <- 
+    OldHipHop_dist %>% 
+    mutate(
+        Endless = xstart + xduration / 2, 
+        Neky_Hokey = ystart + yduration / 2) %>% 
+    ggplot(
+        aes(
+            x = Endless,
+            y = Neky_Hokey,
+            fill = d)) + 
+    geom_tile(aes(width = xduration, height = yduration)) +
+    coord_fixed() +
+    scale_x_continuous(
+        breaks = c(0, 14, 215, 237), 
+        labels = 
+            c(
+                'Intro',
+                'Verse',
+                'Outro',
+                ''),
+        ) +
+    scale_y_continuous(
+        breaks = c(0, 7,  40, 56, 92, 103, 125, 141), 
+        labels = 
+            c(
+                'Intro',
+                'Chorus',
+                'Verse',
+                'Solo',
+                'Verse2',
+                'Chorus2',
+                'Outro',
+              ''),
+        ) +
+    scale_fill_viridis_c(option = 'E', guide = "none") +
+    theme_classic() + 
+    theme(axis.text.x = element_text(angle = 30, hjust = 1)) +
+    labs(x = 'Endless Summer Freestyle', y = 'Neky Hokey')
+OldHipHop
+```
+
+***
+
+Finally, it has been decided to analyse through a chromagram the different key moment by pitch of one of the outlier present in the corpus, namely "Endless Summer Freestyle" by G-Eazy ft. YG. As it can be noticed in the chromagram, during the first 13 seconds of intro, in which only the backing track is playing (that is a sample of the song ""Neki-Hokey" by The Cleftones), there's really low energy distributed across the different pitch bands, probably also because of the "artistic" use of a filter for attenuating some frequency ranges. After the intro, voice and drums start to play and the distribution of energy is then equally distributed between C and C ♯ across all the track without any remarkable variation, maintaining a magnitude which may vary from 0,2 to 0,6. In fact, even if the track in question is from the today's corpus, its structure is pretty monotonous and without any chorus or change, reflecting rather the features of a more classical 90's Hip Hop song. 
+Another remarkable feature to be noticed is the bass playing each fourth measure of the track, reflected by the regular peaks of magnitude ( about 0,5) on the A pitch band in the chromagram. 
+Lastly, there's almost no energy distributed during the break from 165 (s) and 172 (s) and the end of the track, starting from 316 (s) where there's only voice.  
+
+```{r}
+OldHipHop_hist <- 
+    OldHipHop_dist %>% 
+    ggplot(aes(x = d)) +
+    geom_histogram(binwidth = 0.5) +
+    theme_classic() + 
+    theme(
+        axis.line.y = element_blank(), 
+        axis.ticks.y = element_blank(),
+        axis.text.y = element_blank()) +
+    scale_x_continuous(breaks = c(0.7, 4.4, 5.5, 6.8, 14.2)) +
+    labs(x = 'Aitchison Distance', y = '')
+ggsave("compmus-Endless.png", OldHipHop_hist, width = 3, height = 2, dpi = 'screen')
+```
+
+![](compmus-Endless.png)
+
 
 ### Understanding of the structure of "The choise is yours" through an analysis of chroma and timbre features
 
@@ -317,4 +305,4 @@ ggplotly(BlackSheepplot)
 
 In this 4th section of the project the structure of the 90s Hip Hop true classic "The Choise is yours" by Black Sheep is analysed by comparing the chroma-based and timbre-based self-similarity matrices. 
 As Hip Hop tracks tend to be pretty homogeneous in their structure, also "The Choise is yours" follows the same trend, by fundamentally showing two main sections in its structural layout, which could be named in this case as kind of verse and chorus. The alternation of the two sections is not well visible in the chroma-based matrix, as there are no great variations in terms of pitches across the entire song. 
-In contrast, the timbre-based matrix makes this alternation much more visible, as the switch to the different part of the song is highlighted by the presense or the absence of certain instruments: the verse is charachterised by the well-known double bass riff, while in the chorus only voices and drums are present.
+In contrast, the timbre-based matrix makes this alternation much more visible, as the switch to the different part of the song is highlighted by the presence or the absence of certain instruments: the verse is charachterised by the well-known double bass riff, while in the chorus only voices and drums are present.
