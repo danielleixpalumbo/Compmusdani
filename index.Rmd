@@ -157,9 +157,11 @@ TodayHipHop
 
 ***
 
-Finally, it has been decided to analyse through a chromagram the different key moment by pitch of one of the outlier present in the corpus, namely "Endless Summer Freestyle" by G-Eazy ft. YG. As it can be noticed in the chromagram, during the first 13 seconds of intro, in which only the backing track is playing (that is a sample of the song ""Neki-Hokey" by The Cleftones), there's really low energy distributed across the different pitch bands, probably also because of the "artistic" use of a filter for attenuating some frequency ranges. After the intro, voice and drums start to play and the distribution of energy is then equally distributed between C and C ♯ across all the track without any remarkable variation, maintaining a magnitude which may vary from 0,2 to 0,6. In fact, even if the track in question is from the today's corpus, its structure is pretty monotonous and without any chorus or change, reflecting rather the features of a more classical 90's Hip Hop song. 
-Another remarkable feature to be noticed is the bass playing each fourth measure of the track, reflected by the regular peaks of magnitude ( about 0,5) on the A pitch band in the chromagram. 
-Lastly, there's almost no energy distributed during the break from 165 (s) and 172 (s) and the end of the track, starting from 316 (s) where there's only voice.  
+In order to fully define what are the sonic differences between 90's and today's Hip Hop it is necessary to take in account how the use of sampling has changed between these two time frames. In fact, sampling represents one of the most common artistic practices performed by Hip Hop producers during the composition of a track, by means of which a portion or sample from another sound recording is reused and manipulated. 
+
+To do this, it has been decided to look to what extent two of the most representative Hip Hop tracks from the two different time frames, which make use of samples coming from other sound recordings, differ from the original tracks. The differences between the Hip Hop tracks and the original songs is indicated by showing their alignments with the dynamic time-warping techniques, using the Aitchison distance between chroma features. 
+
+The famous Hip Hop track "He Got Game" by Public Enemy from the 90's is shown as reference point for this comparison in its alignment with the other real classic "For What it's Worth" by Buffalo Springfield, the main riff of which (the well known guitar harmonics played by Neil Young) has been sampled in fact by Public Enemy and constitutes the skeleton of the Hip Hop track. The sample in "He Got Game" has been not manipulated at all and as a result the guitar riff from Buffalo Springfield plays at the same speed in both songs, which become really different only when there's the chorus in "For What it's Worth". Therefore the two songs are perfectly aligned only when the verse of "For What it's Worth" is playing, as it is basically omnipresent in the structure of "He Got Game".
 
 ```{r}
 TodayHipHop_hist <- 
@@ -236,15 +238,17 @@ OldHipHop <-
     scale_fill_viridis_c(option = 'E', guide = "none") +
     theme_classic() + 
     theme(axis.text.x = element_text(angle = 30, hjust = 1)) +
-    labs(x = 'Endless Summer Freestyle', y = 'Neky Hokey')
+    labs(x = 'Endless Summer Freestyle', y = 'Neki-Hokey')
 OldHipHop
 ```
 
 ***
 
-Finally, it has been decided to analyse through a chromagram the different key moment by pitch of one of the outlier present in the corpus, namely "Endless Summer Freestyle" by G-Eazy ft. YG. As it can be noticed in the chromagram, during the first 13 seconds of intro, in which only the backing track is playing (that is a sample of the song ""Neki-Hokey" by The Cleftones), there's really low energy distributed across the different pitch bands, probably also because of the "artistic" use of a filter for attenuating some frequency ranges. After the intro, voice and drums start to play and the distribution of energy is then equally distributed between C and C ♯ across all the track without any remarkable variation, maintaining a magnitude which may vary from 0,2 to 0,6. In fact, even if the track in question is from the today's corpus, its structure is pretty monotonous and without any chorus or change, reflecting rather the features of a more classical 90's Hip Hop song. 
-Another remarkable feature to be noticed is the bass playing each fourth measure of the track, reflected by the regular peaks of magnitude ( about 0,5) on the A pitch band in the chromagram. 
-Lastly, there's almost no energy distributed during the break from 165 (s) and 172 (s) and the end of the track, starting from 316 (s) where there's only voice.  
+As it has been previously analysed the use of sampling in 90's Hip Hop with "He got Game" by Public Enemy, with the same process it can be observed how this foundational artistic practice has been changed in 25/30 years by looking at the today's Hip Hop song "Endless Summer Freestyle" by G-Eazy ft. YG, the backing track of which is a sample by the song "Neki-Hokey" by the 50's american vocal group "The Cleftones". 
+
+In this case there is almost no consistency in the relationship between the songs, as the original sample by "The Cleftones" is strongly manipulated in "Endless Summer Freestyle", in which the sample's pitch is lowered and consequently it sounds much slower than the original one present in the verse of "Neki-Hokey". In addition, the structure of "Neki-Hokey" is much more complex than the one of "Endless Summer Freestyle" (in which basically the sample is continuosly repeated for the entire track), showing different sections during the song and making therefore any attempt of alignment almost impossible. 
+
+This comparison made through the incorporation of Spotify's chroma features and the alignment of Hip Hop tracks with their respective original sampled tracks showed that the use of sampling has changed a lot in these decades, indicating that the original samples in today's Hip Hop production are subject to much stronger manipulations in terms of pitch shifting, etc.  
 
 ```{r}
 OldHipHop_hist <- 
@@ -416,4 +420,13 @@ Tupac %>%
     scale_fill_viridis_c(option = 'E', guide = 'none') +
     theme_minimal() +
     labs(x = 'Time (s)', y = '')
+
 ```
+
+***
+
+As last tab of the project, it has been decided to make a chordogram of a 90's Hip Hop true classic, namely "Changes" by 2pac, who was one of the most representative artist of the time. 
+The song is characterised by the well-known series of piano chords and this tab of the project aims to show how these chords are detected by the chordogram, in which the track is summarised at the level of beats. 
+
+There are two different series of piano chords that are present during the entire track, which are those of the verse (that move through the following chords: A minor, E minor, D major, C major, G major, D major, C major) and those of the chorus (A minor, G major and C major). These two are generally correctly estimated, but as it can be noticed there's always high spillage into related chords (this is even more evident when the C major chord is played during the verse) and consequently the chord progression does not appear so clearly in the here presented chordogram. 
+
