@@ -18,6 +18,10 @@ library(tidyverse)
 library(spotifyr)
 library(plotly)
 library(compmus)
+library(rsample)
+library(recipes)
+library(parsnip)
+library(yardstick)
 
 # Spotify access variables 
 
@@ -84,6 +88,99 @@ After that the audio features from both playlists have been gathered using "spot
 The values of speechiness are slightly higher for the 90's tracks, demonstrating a little decrease of the use of spoken words in today's tracks. But here too, there's an outlier represented by today's track "Endless Summer Freestyle", which has the highest amount of spoken words with the value of 0.4630. In addition, the average danceability and energy for both playlists have been obtained but those haven't shown any remarkable difference for these features, the values of which are marginally higher in 90's tracks. However, the energy of the tracks has been mapped to the size of the dots, in order to make more information visible. 
 
 Finally, as it can be observed in the scatterplot the dots are coloured by "mode", but in both playlist it has been found a certain balance between songs in major and in minor and there's no remarkable trend to be noticed. The increasing acceleration of today's Hip Hop tracks appear to be at the moment the most interesting finding.
+
+### Use of the Random Forest classifier in order to confirm the project's first findings
+
+```{r}
+HipHop_90s <-
+    get_playlist_audio_features('hhheroes', '5fWeZI5FLdUkowl4qaglPi') %>% 
+    slice(1:20) %>% 
+    add_audio_analysis
+HipHop_today <-
+    get_playlist_audio_features('mejoresplaylistsspotify','0OtdLZ5JVyqB4Zp8aylECe') %>% 
+    slice(1:20) %>% 
+    add_audio_analysis
+```
+
+```{r}
+HipHop <- 
+    HipHop_90s %>% mutate(playlist = "90's Hip Hop") %>% 
+    bind_rows(
+        HipHop_today %>% mutate(playlist = "Today's Hip Hop")) %>% 
+    mutate(playlist = factor(playlist)) %>% 
+    mutate(
+        segments = 
+            map2(segments, key, compmus_c_transpose)) %>% 
+    mutate(
+        pitches = 
+            map(segments, 
+                compmus_summarise, pitches, 
+                method = 'mean', norm = 'manhattan'),
+        timbre =
+            map(
+                segments,
+                compmus_summarise, timbre,
+                method = 'mean')) %>% 
+    mutate(pitches = map(pitches, compmus_normalise, 'clr')) %>% 
+    mutate_at(vars(pitches, timbre), map, bind_rows) %>% 
+    unnest(pitches, timbre)
+```
+
+```{r}
+HipHop_class <- 
+    recipe(playlist ~
+               danceability +
+               energy +
+               loudness +
+               speechiness +
+               acousticness +
+               instrumentalness +
+               liveness +
+               valence +
+               tempo +
+               duration_ms +
+               C + `C#|Db` + D + `D#|Eb` +
+               E + `F` + `F#|Gb` + G +
+               `G#|Ab` + A + `A#|Bb` + B +
+               c01 + c02 + c03 + c04 + c05 + c06 +
+               c07 + c08 + c09 + c10 + c11 + c12,
+           data = HipHop) %>% 
+    step_center(all_predictors()) %>%
+    step_scale(all_predictors()) %>%
+    # step_range(all_predictors()) %>% 
+    prep(HipHop) %>% 
+    juice
+```
+
+```{r}
+HipHop_cv <- HipHop_class %>% vfold_cv(5)
+```
+
+```{r}
+HipHop_forest <- rand_forest() %>% set_engine('randomForest')
+predict_forest <- function(split)
+    fit(HipHop_forest, playlist ~ ., data = analysis(split)) %>% 
+    predict(assessment(split), type = 'class') %>%
+    bind_cols(assessment(split))
+```
+
+```{r}
+HipHop_cv %>% 
+    mutate(pred = map(splits, predict_forest)) %>% 
+    unnest(pred) %>% 
+    metric_set(accuracy, kap, j_index)(truth = playlist, estimate = .pred_class)
+```
+
+```{r}
+HipHop_class %>% 
+    fit(HipHop_forest, playlist ~ ., data = .) %>% 
+    pluck('fit') %>% 
+    randomForest::varImpPlot()
+```
+
+***
+
+By using the random forest classifier, the project aims to see if the results previously dipslayed could be considered solid in order to anwer to the research question of this portfolio. As it can be seen clearly by the plot, which shows the best-quality ranking of feature importance, tempo and speechiness are confirmed as the most important features of our playlists along with timbre, especially in its components 7 and 8 which will be better analysed later.
 
 ### The use of samples in 90's Hip-Hop, a closer look to "He got game"
 
