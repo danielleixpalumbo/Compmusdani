@@ -6,7 +6,6 @@ output:
    flexdashboard::flex_dashboard:
        storyboard: true
        theme: lumen
-       vertical_layout: scroll 
 ---
 
 ```{r, cache = FALSE}
