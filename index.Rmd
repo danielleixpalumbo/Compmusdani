@@ -12,6 +12,7 @@ output:
 
 devtools::install_github('charlie86/spotifyr')
 devtools::install_github('jaburgoyne/compmus')
+devtools::install_github("kassambara/ggpubr")
 
 library(tidyverse)
 library(spotifyr)
@@ -23,6 +24,9 @@ library(parsnip)
 library(yardstick)
 library(ggdendro)
 library(protoclust)
+library(ggplot2)
+library(gridExtra)
+library(grid)
 
 # Spotify access variables 
 
@@ -325,7 +329,7 @@ HeGotGame %>%
                 ''),
         ) +
         ggtitle("He Got Game") +
-        theme_minimal() 
+        theme_minimal() ->p1
 ```
 
 ```{r}
@@ -361,7 +365,11 @@ ForWhat %>%
               ''),
         ) +
     ggtitle("For What it's Worth") +
-    theme_minimal()
+    theme_minimal() ->p2
+```
+
+```{r}
+grid.arrange(p1, p2, ncol = 2)
 ```
 
 ***
@@ -400,7 +408,7 @@ Endless %>%
                 ''),
         ) +
     ggtitle("Endless Summer Freestyle") +
-    theme_minimal()
+    theme_minimal() ->p3
 ```
 
 ```{r}
@@ -433,8 +441,12 @@ Neky_Hokey %>%
               ''),
         ) +
     ggtitle("Neki-Hokey") +
-    theme_minimal()
+    theme_minimal() ->p4
 ```    
+
+```{r}
+grid.arrange(p3, p4, ncol = 2)
+```
 
 ***
 
