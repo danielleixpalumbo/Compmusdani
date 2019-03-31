@@ -8,7 +8,7 @@ output:
        theme: lumen
 ---
 
-```{r, cache = FALSE}
+```{r, cache = FALSE, include = FALSE}
 
 devtools::install_github('charlie86/spotifyr')
 devtools::install_github('jaburgoyne/compmus')
@@ -21,6 +21,8 @@ library(rsample)
 library(recipes)
 library(parsnip)
 library(yardstick)
+library(ggdendro)
+library(protoclust)
 
 # Spotify access variables 
 
@@ -65,7 +67,7 @@ HipHop_label_Party<- tibble(
     tempo =  201.936)
 HipHopScatterplot <-    
 HipHops %>%
-  ggplot(aes(x = speechiness, y = tempo, color = mode, size = energy, label = track_name)) +
+  ggplot(aes(x = speechiness, y = tempo, color = mode, size = loudness, label = track_name)) +
    geom_point(alpha = 0.8)+
    facet_wrap(~ playlist)+
    geom_text (aes( x = speechiness,y = tempo, label = label), colour = "black", size = 3, data = HipHop_label_Around, hjust = "left", vjust = "up", nudge_y = 13)+
@@ -87,6 +89,43 @@ After that the audio features from both playlists have been gathered using "spot
 The values of speechiness are slightly higher for the 90's tracks, demonstrating a little decrease of the use of spoken words in today's tracks. But here too, there's an outlier represented by today's track "Endless Summer Freestyle", which has the highest amount of spoken words with the value of 0.4630. In addition, the average danceability and energy for both playlists have been obtained but those haven't shown any remarkable difference for these features, the values of which are marginally higher in 90's tracks. However, the energy of the tracks has been mapped to the size of the dots, in order to make more information visible. 
 
 Finally, as it can be observed in the scatterplot the dots are coloured by "mode", but in both playlist it has been found a certain balance between songs in major and in minor and there's no remarkable trend to be noticed. The increasing acceleration of today's Hip Hop tracks appear to be at the moment the most interesting finding.
+
+### Analysis of Spotify's Timbre Coefficients for the two playlists 
+
+```{r}
+HipHop_90s_Timbre <-
+    get_playlist_audio_features(
+        'hhheroes', 
+        '5fWeZI5FLdUkowl4qaglPi') %>% 
+    slice(1:30) %>% 
+    add_audio_analysis()
+HipHop_today_Timbre <-
+    get_playlist_audio_features(
+        'mejoresplaylistsspotify', 
+        '0OtdLZ5JVyqB4Zp8aylECe') %>% 
+    slice(1:30) %>% 
+    add_audio_analysis()
+HipHop_Timbre <-
+    HipHop_90s_Timbre %>% mutate(genre = "90's Hip Hop") %>%
+    bind_rows(HipHop_today_Timbre %>% mutate(genre = "Today's Hip Hop"))
+```
+
+```{r}
+HipHop_Timbre %>% 
+    mutate(
+        timbre =
+            map(
+                segments,
+                compmus_summarise,
+                timbre,
+                method = 'mean')) %>%
+    select(genre, timbre) %>% 
+    compmus_gather_timbre %>% 
+    ggplot(aes(x = basis, y = value, fill = genre)) +
+    geom_violin() +
+    scale_fill_viridis_d() +
+    labs(x = 'Spotify Timbre Coefficients', y = '', fill = 'Genre')
+```
 
 ### Use of the Random Forest classifier in order to confirm the project's first findings
 
@@ -181,6 +220,75 @@ HipHop_class %>%
 
 By using the random forest classifier, the project aims to see if the results previously dipslayed could be considered solid in order to anwer to the research question of this portfolio. As it can be seen clearly by the plot, which shows the best-quality ranking of feature importance, tempo and speechiness are confirmed as the most important features of our playlists along with timbre, especially in its components 7 and 8 which will be better analysed later.
 
+### Clustering 
+
+```{r}
+HipHop_90s <-
+    get_playlist_audio_features('hhheroes', '5fWeZI5FLdUkowl4qaglPi') %>% 
+    add_audio_analysis 
+HipHop_today <-
+    get_playlist_audio_features('mejoresplaylistsspotify','0OtdLZ5JVyqB4Zp8aylECe') %>% 
+    add_audio_analysis
+```    
+
+```{r}
+HipHop_Clust <- 
+    HipHop_90s %>% mutate(playlist = "90's Hip Hop") %>% 
+    bind_rows(
+        HipHop_today %>% mutate(playlist = "Today's Hip Hop")) %>% 
+    mutate(
+        segments = 
+            map2(segments, key, compmus_c_transpose)) %>% 
+    mutate(
+        pitches = 
+            map(segments, 
+                compmus_summarise, pitches, 
+                method = 'mean', norm = 'manhattan'),
+        timbre =
+            map(
+                segments,
+                compmus_summarise, timbre,
+                method = 'mean')) %>% 
+    mutate(pitches = map(pitches, compmus_normalise, 'clr')) %>% 
+    mutate_at(vars(pitches, timbre), map, bind_rows) %>% 
+    unnest(pitches, timbre)
+```
+
+```{r}
+HipHop_juice <- 
+    recipe(track_name ~
+               danceability +
+               energy +
+               loudness +
+               speechiness +
+               acousticness +
+               instrumentalness +
+               liveness +
+               valence +
+               tempo +
+               duration_ms +
+               C + `C#|Db` + D + `D#|Eb` +
+               E + `F` + `F#|Gb` + G +
+               `G#|Ab` + A + `A#|Bb` + B +
+               c01 + c02 + c03 + c04 + c05 + c06 +
+               c07 + c08 + c09 + c10 + c11 + c12,
+           data = HipHop_Clust) %>% 
+    step_center(all_predictors()) %>%
+    step_scale(all_predictors()) %>%
+    # step_range(all_predictors()) %>% 
+    prep(HipHop_Clust %>% mutate(track_name = str_trunc(track_name, 20))) %>% 
+    juice %>% 
+    column_to_rownames('track_name')  %>% 
+```
+
+```{r}
+HipHop_dist <- dist(HipHop_juice, method = 'euclidean')
+```
+
+```{r}
+protoclust(HipHop_dist) %>% dendro_data %>% ggdendrogram
+```
+
 ### The use of samples in 90's Hip-Hop, a closer look to "He got game"
 
 ```{r}
@@ -188,67 +296,69 @@ HeGotGame <-
     get_tidy_audio_analysis('7aRGb3vZGMLNpK2PEdUjdA') %>% 
     select(segments) %>% unnest(segments) %>% 
     select(start, duration, pitches)
-ForWhat <- 
-    get_tidy_audio_analysis('1qRA5BS78u3gME0loMl9AA') %>% 
-    select(segments) %>% unnest(segments) %>% 
-    select(start, duration, pitches)
-TodayHipHop_dist <- 
-    compmus_long_distance(
-    HeGotGame %>% mutate(pitches = map(pitches, compmus_normalise, 'manhattan')),
-    ForWhat %>% mutate(pitches = map(pitches, compmus_normalise, 'manhattan')),
-    feature = pitches,
-    method = 'aitchison')
-```
-
-
-```{r}
-TodayHipHop <- 
-   TodayHipHop_dist %>% 
-    mutate(
-        HeGotGame = xstart + xduration / 2, 
-        ForWhat = ystart + yduration / 2) %>% 
+HeGotGame %>% 
+    mutate(pitches = map(pitches, compmus_normalise, 'manhattan')) %>% 
+    compmus_gather_chroma %>% 
     ggplot(
         aes(
-            x = HeGotGame,
-            y = ForWhat,
-            fill = d)) + 
-    geom_tile(aes(width = xduration, height = yduration)) +
-    coord_fixed() +
+            x = start + duration / 2, 
+            width = duration, 
+            y = pitch_class, 
+            fill = value)) + 
+    geom_tile() +
+    labs(x = 'Time (s)', y = NULL, fill = 'Magnitude') +
     scale_x_continuous(
         breaks = c(0, 59, 79, 128, 148, 158, 197, 217, 286), 
         labels = 
             c(
-                'Verse',
-                'Chorus',
-                'Verse2',
-                'Chorus2',
-                'Bridge',
-                'OriginalTrackChorus',
-                'Special',
-                'FinalVerse',
+                'V1',
+                'Ch1',
+                'V2',
+                'Ch2',
+                'V3',
+                'Or.Ch',
+                'Tr',
+                'Outro',
                 ''),
         ) +
-    scale_y_continuous(
+        ggtitle("He Got Game") +
+        theme_minimal() 
+```
+
+```{r}
+ForWhat <- 
+    get_tidy_audio_analysis('1qRA5BS78u3gME0loMl9AA') %>% 
+    select(segments) %>% unnest(segments) %>% 
+    select(start, duration, pitches)
+ForWhat %>% 
+    mutate(pitches = map(pitches, compmus_normalise, 'manhattan')) %>% 
+    compmus_gather_chroma %>% 
+    ggplot(
+        aes(
+            x = start + duration / 2, 
+            width = duration, 
+            y = pitch_class, 
+            fill = value)) + 
+    geom_tile() +
+    labs(x = 'Time (s)', y = NULL, fill = 'Magnitude') +  
+    scale_x_continuous(
         breaks = c(0, 28, 34, 63, 69, 78, 97, 102, 112, 131, 153), 
         labels = 
             c(
-                'Verse',
-                'Chorus',
-                'Verse2',
-                'Chorus2',
-                'Bridge',
-                'Verse3',
-                'Chorus3',
-                'Bridge2' ,
-                'Special' ,
-                'Chorus4' , 
+                'V1',
+                'Ch1',
+                'V2',
+                'Ch2',
+                'Tr1',
+                'V3',
+                'Ch3',
+                'Solo' ,
+                'Tr2' ,
+                'Outro' , 
               ''),
         ) +
-    scale_fill_viridis_c(option = 'E', guide = "none") +
-    theme_classic() + 
-    theme(axis.text.x = element_text(angle = 30, hjust = 1)) +
-    labs(x = 'He Got Game', y = 'For What it s Worth')
-TodayHipHop
+    ggtitle("For What it's Worth") +
+    theme_minimal()
 ```
 
 ***
@@ -259,23 +369,6 @@ To do this, it has been decided to look to what extent two of the most represent
 
 The famous Hip Hop track "He Got Game" by Public Enemy from the 90's is shown as reference point for this comparison in its alignment with the other real classic "For What it's Worth" by Buffalo Springfield, the main riff of which (the well known guitar harmonics played by Neil Young) has been sampled in fact by Public Enemy and constitutes the skeleton of the Hip Hop track. The sample in "He Got Game" has been not manipulated at all and as a result the guitar riff from Buffalo Springfield plays at the same speed in both songs, which become really different only when there's the chorus in "For What it's Worth". Therefore the two songs are perfectly aligned only when the verse of "For What it's Worth" is playing, as it is basically omnipresent in the structure of "He Got Game".
 
-```{r}
-TodayHipHop_hist <- 
-    TodayHipHop_dist %>% 
-    ggplot(aes(x = d)) +
-    geom_histogram(binwidth = 0.5) +
-    theme_classic() + 
-    theme(
-        axis.line.y = element_blank(), 
-        axis.ticks.y = element_blank(),
-        axis.text.y = element_blank()) +
-    scale_x_continuous(breaks = c(0.7, 4.4, 5.5, 6.8, 14.2)) +
-    labs(x = 'Aitchison Distance', y = '')
-ggsave("compmus-HeGotGame.png", TodayHipHop_hist, width = 3, height = 2, dpi = 'screen')
-```
-
-![](compmus-HeGotGame.png)
-
 ### How is changed the use of samples in today's Hip-Hop? Let's take "Endless Summer Freestyle" as benchmark for our comparison
 
 ```{r}
@@ -283,60 +376,62 @@ Endless <-
     get_tidy_audio_analysis('6yxYCurtUz8MOAgWGxlAzP') %>% 
     select(segments) %>% unnest(segments) %>% 
     select(start, duration, pitches)
-Neky_Hokey <- 
-    get_tidy_audio_analysis('0DelTitHNIJ8uUBpGpT0Hk') %>% 
-    select(segments) %>% unnest(segments) %>% 
-    select(start, duration, pitches)
-OldHipHop_dist <- 
-    compmus_long_distance(
-    Endless %>% mutate(pitches = map(pitches, compmus_normalise, 'manhattan')),
-    Neky_Hokey %>% mutate(pitches = map(pitches, compmus_normalise, 'manhattan')),
-    feature = pitches,
-    method = 'aitchison')
-```
-
-
-```{r}
-OldHipHop <- 
-    OldHipHop_dist %>% 
-    mutate(
-        Endless = xstart + xduration / 2, 
-        Neky_Hokey = ystart + yduration / 2) %>% 
+Endless %>% 
+    mutate(pitches = map(pitches, compmus_normalise, 'manhattan')) %>% 
+    compmus_gather_chroma %>% 
     ggplot(
         aes(
-            x = Endless,
-            y = Neky_Hokey,
-            fill = d)) + 
-    geom_tile(aes(width = xduration, height = yduration)) +
-    coord_fixed() +
+            x = start + duration / 2, 
+            width = duration, 
+            y = pitch_class, 
+            fill = value)) + 
+    geom_tile() +
+    labs(x = 'Time (s)', y = NULL, fill = 'Magnitude') +
     scale_x_continuous(
         breaks = c(0, 14, 215, 237), 
         labels = 
             c(
                 'Intro',
-                'Verse',
+                'V1',
                 'Outro',
                 ''),
         ) +
-    scale_y_continuous(
+    ggtitle("Endless Summer Freestyle") +
+    theme_minimal()
+```
+
+```{r}
+Neky_Hokey <- 
+    get_tidy_audio_analysis('0DelTitHNIJ8uUBpGpT0Hk') %>% 
+    select(segments) %>% unnest(segments) %>% 
+    select(start, duration, pitches)
+Neky_Hokey %>% 
+    mutate(pitches = map(pitches, compmus_normalise, 'manhattan')) %>% 
+    compmus_gather_chroma %>% 
+    ggplot(
+        aes(
+            x = start + duration / 2, 
+            width = duration, 
+            y = pitch_class, 
+            fill = value)) + 
+    geom_tile() +
+    labs(x = 'Time (s)', y = NULL, fill = 'Magnitude') +
+    scale_x_continuous(
         breaks = c(0, 7,  40, 56, 92, 103, 125, 141), 
         labels = 
             c(
                 'Intro',
-                'Chorus',
-                'Verse',
+                'Ch1',
+                'V1',
                 'Solo',
-                'Verse2',
-                'Chorus2',
+                'V2',
+                'Ch2',
                 'Outro',
               ''),
         ) +
-    scale_fill_viridis_c(option = 'E', guide = "none") +
-    theme_classic() + 
-    theme(axis.text.x = element_text(angle = 30, hjust = 1)) +
-    labs(x = 'Endless Summer Freestyle', y = 'Neki-Hokey')
-OldHipHop
-```
+    ggtitle("Neki-Hokey") +
+    theme_minimal()
+```    
 
 ***
 
@@ -345,24 +440,6 @@ As it has been previously analysed the use of sampling in 90's Hip Hop with "He 
 In this case there is almost no consistency in the relationship between the songs, as the original sample by "The Cleftones" is strongly manipulated in "Endless Summer Freestyle", in which the sample's pitch is lowered and consequently it sounds much slower than the original one present in the verse of "Neki-Hokey". In addition, the structure of "Neki-Hokey" is much more complex than the one of "Endless Summer Freestyle" (in which basically the sample is continuosly repeated for the entire track), showing different sections during the song and making therefore any attempt of alignment almost impossible. 
 
 This comparison made through the incorporation of Spotify's chroma features and the alignment of Hip Hop tracks with their respective original sampled tracks showed that the use of sampling has changed a lot in these decades, indicating that the original samples in today's Hip Hop production are subject to much stronger manipulations in terms of pitch shifting, etc.  
-
-```{r}
-OldHipHop_hist <- 
-    OldHipHop_dist %>% 
-    ggplot(aes(x = d)) +
-    geom_histogram(binwidth = 0.5) +
-    theme_classic() + 
-    theme(
-        axis.line.y = element_blank(), 
-        axis.ticks.y = element_blank(),
-        axis.text.y = element_blank()) +
-    scale_x_continuous(breaks = c(0.7, 4.4, 5.5, 6.8, 14.2)) +
-    labs(x = 'Aitchison Distance', y = '')
-ggsave("compmus-Endless.png", OldHipHop_hist, width = 3, height = 2, dpi = 'screen')
-```
-
-![](compmus-Endless.png)
-
 
 ### Understanding of the structure of "The choise is yours" through an analysis of chroma and timbre features
 
@@ -375,7 +452,7 @@ BlackSheep <-
         pitches = 
             map(segments, 
                 compmus_summarise, pitches, 
-                method = 'rms', norm = 'euclidean')) %>% 
+                method = 'acentre', norm = 'manhattan')) %>% 
     mutate(
         timbre = 
             map(segments, 
@@ -383,7 +460,7 @@ BlackSheep <-
                 method = 'rms'))
 BlackSheepplot <- 
     bind_rows(
-        BlackSheep %>% compmus_self_similarity(pitches, 'angular') %>% mutate(d = d / max(d), type = "Chroma"),
+        BlackSheep %>% compmus_self_similarity(pitches, 'aitchison') %>% mutate(d = d / max(d), type = "Chroma"),
         BlackSheep %>% compmus_self_similarity(timbre, 'cosine') %>% mutate(d = d / max(d), type = "Timbre")) %>% 
     ggplot(
         aes(
