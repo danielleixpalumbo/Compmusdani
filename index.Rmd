@@ -42,10 +42,14 @@ access_token <- get_spotify_access_token()
 
 *** 
 
-**How does Hip-Hop from the 90s differ from Hip-Hop today?** 
+In a today's music scene which, according to many music journalists and those who are still nostalgic for the "good old days", has been lacking for so long of a new real music revolution and the opening of new sonic scenarios, a new musical phenomenon is emerged in the last decade by going straight to the top of the world charts: a new wave of Hip Hop and its most famous sub-genre, the so-called "Trap" Music. 
 
-With the aim to answer to this question, It has been decided to look for reliable playlists on Spotify through which it could have been gained valuable insight into the most remarkable differences within and between the two time periods. In order to do so, two playlists have been chosen as corpus of data, namely "Hip Hop 90s" from "Hip Hop Heroes" and "Hip Hop 2019: Top100 Rap HITS 2019 / Rap 2019 New Hip Hop Songs" from "Filtr Espana", and have been analysed by comparing their key features. The two playlists contain respectively 64 and 100 tracks. 
-These two playlists were chosen since they presented similar features in terms of number of followers and number of tracks, and also they contained tracks from the most famous and representative artists of the two time periods. 
+The emergence of this new musical phenomena has given rise on the one hand to a renewed enthusiasm among the more open to this radical music change while building also a very solid fan-base among the younger generations. However, those who are fond of the "old-school" Hip Hop - namely that which spread across the world in the 1990s (even if it was around well before that time) - have trouble coming to terms with such radical change, which has been widely considered as provocateour, devoid of any content or even a musical degeneration of the old-style Hip Hop.
+
+The seeming overuse of electronics in the music producion by today's Hip Hop is often criticised by the old-school Hip Hop's purists, for instance the massive deployment of audio processors such as the notorious Auto-Tune (the use of which really revolutionised nowadays popular music) and of soft synth plugins which in combination lead to a final sonic outcome which is very different from the "traditional" one, obtained by "clean" rap vocals, turntables scratching, analog drum machines and samplers.
+
+Having said all this, how does today's Hip Hop differ from 90's Hip Hop? 
+The here presented portfolio aims to answer to this question with a scientific-driven approach, supported by data gathered from the Spotify API by using music information retrieval and audio-mining tools in order to analyse music recordings from both time periods in an objective, without prejudice and not anedoctal way. In order to do so and to gain valuable insight into the most remarkable differences between today's Hip Hop and 90's Hip Hop, it has been decided to look for reliable playlists on Spotify, which present similar features in terms of number of tracks and especially which contain the most famous and representative artists of the two time periods. With this purpose in mind, two playlists have been chosen as corpus of data and have been analysed by comparing their Spotify features, namely "Hip Hop 90s" created by "Hip Hop Heroes" and "Today's Hip Hop" created by the author of this portfolio. The two playlists contain respectively 64 and 98 tracks. 
 
 ### Use of the Random Forest classifier in order to confirm the project's first findings
 
@@ -138,7 +142,11 @@ HipHop_class %>%
 
 ***
 
-By using the random forest classifier, the project aims to see if the results previously dipslayed could be considered solid in order to anwer to the research question of this portfolio. As it can be seen clearly by the plot, which shows the best-quality ranking of feature importance, tempo and speechiness are confirmed as the most important features of our playlists along with timbre, especially in its components 7 and 8 which will be better analysed later.
+The first step of the here presented portfolio has been that of deploying a random forest classifier, an ensemble learning method which could give the best-quality ranking of feature importance within the two playlists, through which a solid basis for the further observations of this project has been created. 
+
+The plot resulted from the application of the random forest classifier can be observed here on the side, where it's clearly visible that "tempo" is considered as the most important feature of the two playlists, followed by different Spotify's Timbre Coefficients, more precisely "c07", "c10" and "c08". Among the Spotify’s track-level features the second most important is "speechiness", which is to be expected since the analysed data are two Hip Hop playlists. Conversely, chroma features do not appear on average as remarkable characteristics among the two playlists. 
+
+As a result, the timbre features and "tempo" along with "speechiness" have been displayed as the most important attributes to which it must paid attention, forming the basis for the further observations which are presented in the next tabs of this portfolio.
 
 ### Clustering 
 
@@ -211,6 +219,20 @@ HipHop_dist <- dist(HipHop_juice, method = 'euclidean')
 protoclust(HipHop_dist) %>% dendro_data %>% ggdendrogram
 ```
 
+*** 
+
+Having explored the Spotify features for classification and having formed the basis for this portfolio, this 3rd tab has the intent to further explore how these can generate potentially meaningful clusters of tracks from the two analysed Hip Hop playlists. 
+
+By using hierarchical clustering algorithms attempts have been made to look for notable patterns in a part of the corpus composed by the first 20 songs from both playlists, which are represented by the dendogram displayed here on the side, where the 40 songs are broken into 4 clusters. The first small one is mainly composed by "Trap" tracks with a strong electronic character, which is confirmed by the presence of the song *Blast Off* by the electronic music producer **Gesaffelstein** feat the rapper **Pharrel Wiliams** that represents a perfect mixture of Hip Hop and Disco.
+
+The second cluster is mainly composed by today's Hip Hop tracks (especially by Trap ones), except for some outliers coming from the 90's playlists which, however, seemingly share some characteristics in terms of "tempo" and "energy".
+
+The third cluster is also the biggest one and is mostly represented by "pure", "old-school" Hip-Hop tracks which do not show any influence coming from other genres and which are basically characterised by the same structure: a backing track based on a sample got from another sound recording, drums and rapping vocals. However, it's hard to define the reason for the presence of some outliers coming from the today's Hip Hop playlists, which share between them a basic Trap structure but also a strong melodical character that reflect significant Pop and Emo influences, as in the case of the two tracks *Sex with My Ex* by **Lil Peep**  and *Sunflower - Spider-Man: Into the Spider-Verse* by **Post-Malone**.
+
+Finally, the fourth cluster is mainly represented by Hip Hop tracks with a strong Funk/Jazz/New Soul influence, highlighted by the presence of two tracks by **Erykah Badu** which make these influences pretty evident. Also in this case there are a couple of outliers represented by Trap tracks, which despite not having these influences at all (one of them, namely the track *Old Town Road*, even use samples from the Industrial-Rock band **Nine Inch Nails**) share a certain "darker" harmony and melodic content which are also confirmed by the lower values of Spotify's feature "valence".
+
+In conclusion, even if partly the songs have been clustered in the here presented way not because of the musical content but rather because of the textual one, as for instance can be seen the presence of couples of songs next to each other because produced by the same artist, however the   The song titles make it clear that the over-arching them of this list has more to do with textual than musical content, however the hierarchical clustering algorithms have done overall a pretty good job in detecting different music styles in the corpus. In the next tabs the features of the tracks of both playlists will be more thoroughly analysed in order to find remarkable differences which can answer to the research question of this portfolio.
+
 ### A closer look at the two playlists: is Hip Hop become faster in 20 years?  
 
 ```{r}
@@ -253,11 +275,17 @@ ggplotly(HipHopScatterplot)
 
 *** 
 
-After that the audio features from both playlists have been gathered using "spotifyr", it has been decided to represent the two data sets in two different scatterplots with speechiness on the x-axis and tempo on the y-axis. As a result, it can be observed on the scatterplots that overall Hip-Hop got significantly faster in 20 years, since most of the 90's tracks are below the 100 BPM level while most of the today's tracks cover the range from 100 BPM to 175. In addition, from the scatterplot can be observed also a couple of outliers, which are two today's hip hop songs, namely "Around the Way Girl" and "Party Up", that surprisingly are above the 200 BPM, representing the fastest tracks of both data sets. However, after I listened to both the songs, it must be said that in this case Spotify's tempo detection was far from the truth. 
+On this tab the Spotify’s track-level features from both playlists have been finally gathered and represented on two different scatterplots next to each other, with speechiness mapped on the x-axis and tempo on the y-axis (as those were indicated as two of the most important features by the random forest classifier). In addition the loudness of the tracks has been mapped to the size of the dots, which are also coloured by musical "mode" (major or minor).
 
-The values of speechiness are slightly higher for the 90's tracks, demonstrating a little decrease of the use of spoken words in today's tracks. But here too, there's an outlier represented by today's track "Endless Summer Freestyle", which has the highest amount of spoken words with the value of 0.4630. In addition, the average danceability and energy for both playlists have been obtained but those haven't shown any remarkable difference for these features, the values of which are marginally higher in 90's tracks. However, the energy of the tracks has been mapped to the size of the dots, in order to make more information visible. 
+As a result, it can be observed on the scatterplots that overall Hip-Hop got significantly faster in 20 years, since most of the 90's tracks are clustered below the 100 BPM level while most of the today's tracks cover the range from 100 BPM to 175. However, from the scatterplots can be observed also a couple of outliers (which have been labelled in order to make them more evident), which are two 90's hip hop songs, namely *Around the Way Girl* and *Party Up*, that surprisingly are above the 200 BPM, representing the fastest tracks of both data sets. However, after a careful listening of the two songs, it must be said that in this case Spotify's tempo detection was far from the truth, pointing out the problem that unfortunately obtaining features via computational methods is not always as good and precise as it is expected to be. 
 
-Finally, as it can be observed in the scatterplot the dots are coloured by "mode", but in both playlist it has been found a certain balance between songs in major and in minor and there's no remarkable trend to be noticed. The increasing acceleration of today's Hip Hop tracks appear to be at the moment the most interesting finding.
+Moreover, it can be seen that the values of "speechiness" are slightly higher for the 90's tracks, demonstrating a little decrease of the use of spoken words in today's tracks and conferming therefore the greater use by today's Hip Hop of the Auto-Tune and of voice audio effects in general. But here too, there's an outlier represented by today's track *Bet* by **Octavian (feat Skepta & Michael Phantom)**, which has the highest amount of spoken words with the value of 0.4890. In fact, the track *Bet* is characterised by a constant presence of the vocals, which are also really "clean" and the intonations and voice inflections of which closely reflect the aesthetics of word play, in a way that would be widely recognised as belonging to "old-school" Hip Hop.
+
+Another point which is worth mentioning is that related to Spotify's "loudness" features, which in fact reflect what is widely known about Hip Hop, namely that its loudness range is often pretty low, as it is also confirmed by the overall small size of the dots for both playlists. However, also in this case there is an interesting outlier represented by the 90's track *What's the Difference* by **Dr.Dre (feat Eminem & Xzibit)**, which with a value of 8.538498e-01 stands out from all the tracks of both playlists. In addition, it has to be noted that also the second biggest dot is still a track by **Dr.Dre**, namely *Forgot About Dre* with a value of 2.747208e-01. The reason behind this couple of outliers is explained by a curious anecdote on the the audio mastering production of the album *The Chronic 2001* (to which both the tracks belong to) by **Dr.Dre**, who wanted to make it the "Loudest CD Ever", to the extent that he rejected the mastering done by the famous audio engineer **Bernie Grundman** and he entrusted it to **Brian ‘Big Bass’ Gardner**. This anecdote is reported also by this article published by the famous online automated mastering service [Landr](https://blog.landr.com/loudness-equal-success/), which notes *The Chronic 2001* among 10 of the world’s loudest albums.
+
+Finally, by looking at the colour of the dots in both playlist it has been found a certain balance between songs in major and in minor in both  playlists and therefore there's no remarkable difference to be observed. 
+
+The sharp "tempo" acceleration and the slight decrease of "speechiness" of today's Hip Hop tracks represent the most remarkable differences compared to 90's Hip Hop according to Spotify's  track-level features, which have showed however also a significant common ground between the two time periods, as it is confirmed by the similarities by "mode" and "loudness".
 
 ### Analysis of Spotify's Timbre Coefficients for the two playlists 
 
@@ -296,7 +324,95 @@ HipHop_Timbre %>%
     labs(x = 'Spotify Timbre Coefficients', y = '', fill = 'Genre')
 ```
 
-### The use of samples in 90's Hip-Hop, a closer look to "He got game"
+*** 
+
+Considering that Spotify's Timbre Coefficients have been previously indicated by the random forest classifier as important features for making comparison between the two different playlists, this tab summarises the timbre features at the playlist level in order to compare the average timbre coefficients in both time periods. 
+
+The predictions done by the random forest classifier are correct, as it can observed that the most promising marker distinguishing 90's Hip Hop from today's Hip Hop in terms of timbre is a greater distribution across the coefficients 8 and 10, whereas coefficient 7 shows a greater distribution in today's Hip Hop. 
+
+Unfortunately Spotify's documentation does not provide a clear explaination of its timbre features (except for the first four coefficients), therefore in the next tab with the help of listening tests and of two cepstrograms of two specific tracks, chosen for their high values in the above-mentioned timbre coefficients and which represent both playlist, it will be searched to see how these songs actually differ in terms of timbre. 
+
+### How the "sound colour" of Hip Hop is changed: analysis of the timbre features through cepstograms
+
+```{r}
+Bet <- 
+    get_tidy_audio_analysis('1TULEHv0wpIZYI7zqmhzEg') %>% 
+    compmus_align(bars, segments) %>% 
+    select(bars) %>% unnest(bars) %>% 
+    mutate(
+        pitches = 
+            map(segments, 
+                compmus_summarise, pitches, 
+                method = 'rms', norm = 'euclidean')) %>% 
+    mutate(
+        timbre = 
+            map(segments, 
+                compmus_summarise, timbre, 
+                method = 'mean'))
+```
+
+```{r}
+Bet %>% 
+    compmus_gather_timbre %>% 
+    ggplot(
+        aes(
+            x = start + duration / 2, 
+            width = duration, 
+            y = basis, 
+            fill = value)) + 
+    geom_tile() +
+    labs(x = 'Time (s)', y = NULL, fill = 'Magnitude') +
+    scale_fill_viridis_c(option = 'E') +
+    ggtitle("Bet") +
+    theme_classic() ->p10
+```    
+  
+```{r}
+Dre <- 
+    get_tidy_audio_analysis('7GkrhcYfflOImusWPIFrPN') %>% 
+    compmus_align(bars, segments) %>% 
+    select(bars) %>% unnest(bars) %>% 
+    mutate(
+        pitches = 
+            map(segments, 
+                compmus_summarise, pitches, 
+                method = 'rms', norm = 'euclidean')) %>% 
+    mutate(
+        timbre = 
+            map(segments, 
+                compmus_summarise, timbre, 
+                method = 'mean'))
+```
+
+```{r}
+Dre %>% 
+    compmus_gather_timbre %>% 
+    ggplot(
+        aes(
+            x = start + duration / 2, 
+            width = duration, 
+            y = basis, 
+            fill = value)) + 
+    geom_tile() +
+    labs(x = 'Time (s)', y = NULL, fill = 'Magnitude') +
+    scale_fill_viridis_c(option = 'E') +
+    ggtitle("What's the Difference") +
+    theme_classic() ->p11
+```    
+
+```{r}
+grid.arrange(p10, p11, ncol = 2)
+```
+
+So to continue the analysis of the most remarkable differences distinguishing today's Hip Hop from 90's Hip Hop in terms of timbre, two cepstogram of the tracks *Bet* by **Octavian feat Skepta and Michael Phantom** from today's Hip Hop and *What's the Difference* by **Dr.Dre feat Eminem and Xzibit** are provided. 
+
+The two cepstograms reflect the information provided by the summary of Spotify's timbre coefficients at the playlist level, with a high spread of energy across the coefficients 8 and 10 and a much lower one across coefficient 7 for the 90's track *What's the difference*, whereas *Bet* has pretty high energy distribution across these three coefficients. As it is clear from the two cepstograms and also from the listening tests, the spectral information contained in *Bet* seem much richer compared to those of *What's the Difference*, as the today's track has energy spread across almost all the timbre coefficients, whereas the distribution of energy of *What's the Difference* is almost non existent in certain coefficients. 
+
+After some further careful listening tests, it can be observed that the reason for this "richer"and more complex sonic structure is not really caused by the use of sounds in the different songs, which are pretty standard Hip-Hop synths and drum machines sounds, but rather by how these sounds have been further processed with audio plugins and effects. In fact, *Bet* shows a much more complex sound spatialisation compared to *What's the Difference*, which is on the other hand much more "solid" and almost sounds like "mono". 
+
+As a result, this short analysis of the timbre features that has been finalised with the help of cepstograms indicates that the most remarkable differences between the two time periods in terms of "sound colour" is probably due to a much more complex processing of the audio content conducted by the nowadays producers, which experiment new ways to enrich their sound at the risk of sounding less "solid" and "straightforward".
+
+### The use of samples in 90's Hip-Hop, a closer look to "He got game" in comparison with the sampled track "For What it's Worth"
 
 ```{r}
 HeGotGame <- 
@@ -376,11 +492,15 @@ grid.arrange(p1, p2, ncol = 2)
 
 In order to fully define what are the sonic differences between 90's and today's Hip Hop it is necessary to take in account how the use of sampling has changed between these two time frames. In fact, sampling represents one of the most common artistic practices performed by Hip Hop producers during the composition of a track, by means of which a portion or sample from another sound recording is reused and manipulated. 
 
-To do this, it has been decided to look to what extent two of the most representative Hip Hop tracks from the two different time frames, which make use of samples coming from other sound recordings, differ from the original tracks. The differences between the Hip Hop tracks and the original songs is indicated by showing their alignments with the dynamic time-warping techniques, using the Aitchison distance between chroma features. 
+To do this, it has been decided to look to what extent two of the most representative Hip Hop tracks from the respective two different playlists, which make use of samples coming from other sound recordings, differ from the original tracks. The differences between the Hip Hop tracks and their respective original songs is indicated by comparing their chroma features with the creation of two chromagrams next to each other.
 
-The famous Hip Hop track "He Got Game" by Public Enemy from the 90's is shown as reference point for this comparison in its alignment with the other real classic "For What it's Worth" by Buffalo Springfield, the main riff of which (the well known guitar harmonics played by Neil Young) has been sampled in fact by Public Enemy and constitutes the skeleton of the Hip Hop track. The sample in "He Got Game" has been not manipulated at all and as a result the guitar riff from Buffalo Springfield plays at the same speed in both songs, which become really different only when there's the chorus in "For What it's Worth". Therefore the two songs are perfectly aligned only when the verse of "For What it's Worth" is playing, as it is basically omnipresent in the structure of "He Got Game".
+The famous Hip Hop track *He Got Game* by **Public Enemy** from the 90's is shown as reference point for this comparison in its contrast with the other real classic *For What it's Worth* by **Buffalo Springfield**, the main riff of which (the well known guitar harmonics played by **Neil Young**) has been sampled in fact by Public Enemy and constitutes the skeleton of the entire Hip Hop track.
 
-### How is changed the use of samples in today's Hip-Hop? Let's take "Endless Summer Freestyle" as benchmark for our comparison
+As it can be observed by looking at the chromagrams the sample in *He Got Game* has been not manipulated at all and it perfectly reproduces the same pitch classes of *For What it's Worth*, which reflect correctly the chord progression of the chorus which consists of the two power chords (a chord that consists of only the root note and the fifth) "E" and "A", combined with the two notorius harmonics in "A" and "B" (the chromagram have done a gret job here in capturing the harmonic and melodic characteristics of the two songs, except only for a noticeable but also negligible spillage of energy across the pitch class D♯ caused by the overtones). The slight greater spread of energy across different pitch classes of *For What it's Worth* is caused by the presence of the chorus, which has been not sampled by **Public Enemy** anyway. In addition, it can be seen that overall the spread of energy across the pitch classes "E", "A" and "B"in the chromagram of *He Got Game* is lower for magnitude compared to that of *For What it's Worth*, probably because the sample has been slightly lowered in volume, in order to be used just as backing track and to leave room to the rapping. 
+
+This first comparison has demonstrated a minor manipulation of the original sample by the 90's Hip Hop track, which reflects entirely the harmonic and melodic content of the original track.
+
+### How is changed the use of samples in today's Hip-Hop? "Endless Summer Freestyle" in comparison with the sampled track "Neki-Hokey"
 
 ```{r}
 Endless <- 
@@ -450,11 +570,15 @@ grid.arrange(p3, p4, ncol = 2)
 
 ***
 
-As it has been previously analysed the use of sampling in 90's Hip Hop with "He got Game" by Public Enemy, with the same process it can be observed how this foundational artistic practice has been changed in 25/30 years by looking at the today's Hip Hop song "Endless Summer Freestyle" by G-Eazy ft. YG, the backing track of which is a sample by the song "Neki-Hokey" by the 50's american vocal group "The Cleftones". 
+As it has been previously analysed the use of sampling in 90's Hip Hop with *He got Game* by **Public Enemy**, with the same process it can be observed how this foundational artistic practice has been changed in 25/30 years by looking at the today's Hip Hop song *Endless Summer Freestyle* by **G-Eazy ft. YG**, the backing track of which is a sample by the verse of the song *Neki-Hokey* by the 50's american vocal group **The Cleftones**. 
 
-In this case there is almost no consistency in the relationship between the songs, as the original sample by "The Cleftones" is strongly manipulated in "Endless Summer Freestyle", in which the sample's pitch is lowered and consequently it sounds much slower than the original one present in the verse of "Neki-Hokey". In addition, the structure of "Neki-Hokey" is much more complex than the one of "Endless Summer Freestyle" (in which basically the sample is continuosly repeated for the entire track), showing different sections during the song and making therefore any attempt of alignment almost impossible. 
+Here again the pitch class' detection done by the chromagrams is correct, even if in this case there is less consistency in the harmonic and melodic relationship between the two songs, as the original sample by **The Cleftones** has been manipulated in *Endless Summer Freestyle*, in which the sample's key is lowered from "C♯" to "A" (and consequently it sounds also slower than the original one present in the verse of *Neki-Hokey*). This shift is remarked by the bass playing (introduced by the Hip Hop track and not present in *Neki-Hokey*) each fourth measure of the track, reflected by the regular peaks of magnitude ( about 0,5) on the A pitch band in the chromagram. 
 
-This comparison made through the incorporation of Spotify's chroma features and the alignment of Hip Hop tracks with their respective original sampled tracks showed that the use of sampling has changed a lot in these decades, indicating that the original samples in today's Hip Hop production are subject to much stronger manipulations in terms of pitch shifting, etc.  
+Another novel aspect introduced by the manipulation in *Endless Summer Freestyle* is the continous shift by semitone from the pitch class "C" to "C♯", even if it must be considered that the structure of *Neki-Hokey* is anyway much more complex than the one of *Endless Summer Freestyle* (in which basically the sample is continuosly repeated for the entire track), as it is highlighted by the slight spread of energy across the other pitch classes. In fact, even if *Endless Summer Freestyle* is from the today's corpus, its structure is pretty monotonous and without any chorus or melodic change, reflecting rather the features of a more classical 90's Hip Hop song. In addition, it can be observed in the chromagram of *Endless Summer Freestyle* that during the first 13 seconds of intro, in which only the backing track is playing (that is precisely the sample of the verse from *Neki-Hokey* by **The Cleftones**), there's really low energy distributed across the different pitch bands, probably because of the "artistic" use of a filter for attenuating some frequency ranges. The same is true at the end of the track, where the music stops and only the vocal remains.
+
+As a result, it can be easily understood that in this case the sample has been harmonically and melodically enriched in *Endless Summer Freestyle*, whereas the original verse in *Neki-Hokey* has energy across only the pitch class "C♯".
+
+Finally, these comparisons of the use of sampling between 90's and today's Hip Hop demonstrate that this foundational artistic practice has undergone some significant changes, indicating that the original samples in today's Hip Hop production are subject to much stronger manipulations in terms of pitch shifting, filtering, etc.
 
 ### Understanding of the structure of "The choise is yours" through an analysis of chroma and timbre features
 
@@ -495,9 +619,15 @@ ggplotly(BlackSheepplot)
 
 ***
 
-In this 4th section of the project the structure of the 90s Hip Hop true classic "The Choise is yours" by Black Sheep is analysed by comparing the chroma-based and timbre-based self-similarity matrices. 
-As Hip Hop tracks tend to be pretty homogeneous in their structure, also "The Choise is yours" follows the same trend, by fundamentally showing two main sections in its structural layout, which could be named in this case as kind of verse and chorus. The alternation of the two sections is not well visible in the chroma-based matrix, as there are no great variations in terms of pitches across the entire song. 
-In contrast, the timbre-based matrix makes this alternation much more visible, as the switch to the different part of the song is highlighted by the presence or the absence of certain instruments: the verse is charachterised by the well-known double bass riff, while in the chorus only voices and drums are present.
+From the moment that the argument regarding the structure of a Hip Hop track has really only been touched on in the previous tabs, this 8th section of the portfolio analyses the structure of a 90s Hip Hop true classic, namely *The Choise is yours* by **Black Sheep**, which represents the standard structure of most Hip Hop tracks, regardless of time period. In order to do so, by further taking advantage of music information retrieval and audio-mining tools the structure of the true classic Hip Hop track is analysed by comparing its chroma-based and timbre-based self-similarity matrices. 
+
+As Hip Hop tracks tend to be pretty homogeneous in their structures, also *The Choise is yours* follows the same trend, by fundamentally showing two main alternating sections in its structural layout that could be named in this case as kind of "verse" and "chorus" and some short transitions, which can be grasped with the help of self-similarity matrices. 
+
+After the notorious intro charachterised by the well-known double bass riff that is also present during the 3 verses, which are occurring respectively at 0.19, 1.21, 2.32 and are all well detected by the self-similarity matrices, although the timbre-based one makes their alternation with the chorus slightly more evident.In addition, also the short transition at 2:23 and the three choruses occurring at 1:02, 2:04 and 3:09 (the last of which is repeated continuously until the fade-out) are also correctly detected, in which the timbre-based matrix can even better underline the part where the chorus is fading out at 3:28, when most of the instruments gradually stop to play and only the drums with the vocals remain. 
+
+Overall the two self- similarity matrices have done a great job in making clear the structure of the 90's Hip Hop classic *The Choise is yours* by **Black Sheep**, the few patterns of which have been detected optimally in particular by the timbre-based matrix. The reason for that is probably due to the pretty homogeneous harmonic and melodic content of the track, the different parts of which are mainly characterised by the presence or absence of certain instruments. 
+
+Now that the typical structure of an Hip Hop song has been analysed, it's worth exploring another field in turmoil of music information retrieval by looking at another Hip Hop true classic in the next tab.
 
 ### Chordogram of the true classic "Changes" by 2pac
 
@@ -607,14 +737,47 @@ Tupac %>%
     geom_tile() +
     scale_fill_viridis_c(option = 'E', guide = 'none') +
     theme_minimal() +
-    labs(x = 'Time (s)', y = '')
+    labs(x = 'Time (s)', y = '') +
+    theme_minimal() ->p5
+```
 
+```{r}
+Tupac_Chroma <- 
+    get_tidy_audio_analysis('7aRGb3vZGMLNpK2PEdUjdA') %>% 
+    select(segments) %>% unnest(segments) %>% 
+    select(start, duration, pitches)
+Tupac_Chroma %>% 
+    mutate(pitches = map(pitches, compmus_normalise, 'manhattan')) %>% 
+    compmus_gather_chroma %>% 
+    ggplot(
+        aes(
+            x = start + duration / 2, 
+            width = duration, 
+            y = pitch_class, 
+            fill = value)) + 
+    geom_tile() +
+    labs(x = 'Time (s)', y = NULL, fill = 'Magnitude') +
+        theme_minimal() ->p6
+```
+
+```{r}
+grid.arrange(p5, p6, ncol = 2)
 ```
 
 ***
 
-As last tab of the project, it has been decided to make a chordogram of a 90's Hip Hop true classic, namely "Changes" by 2pac, who was one of the most representative artist of the time. 
-The song is characterised by the well-known series of piano chords and this tab of the project aims to show how these chords are detected by the chordogram, in which the track is summarised at the level of beats. 
+In this penultimate tab of this portfolio, it has been decided to further explore the field of harmonic analysis of music via computational methods by looking at a subproblem of this area of research known as "Chord recognition". In order to do so, it has been decided to make a chordogram of another 90's Hip Hop true classic, namely *Changes* by **2pac**, which presents what is in fact probably the most famous chord progression of the history of Hip Hop. This well-known series of piano chords can be seen on the side here as detected by the chordogram, in which the track is summarised at the level of beats. 
 
-There are two different series of piano chords that are present during the entire track, which are those of the verse (that move through the following chords: A minor, E minor, D major, C major, G major, D major, C major) and those of the chorus (A minor, G major and C major). These two are generally correctly estimated, but as it can be noticed there's always high spillage into related chords (this is even more evident when the C major chord is played during the verse) and consequently the chord progression does not appear so clearly in the here presented chordogram. 
+There are two different series of piano chords that are present during the entire track, which are those of the verse (that move through the following chords: A min, E min, D maj, C maj, G maj, D maj, C maj) and the well-known of the chorus (G min, Fmaj7 and C maj). These two are generally correctly estimated, but as it can be noticed there's always high spillage into related chords, especially into dominant seventh chords (this is even more evident when the C major chord is played during the verse). 
 
+As a result, the consistent structure of the 90's Hip Hop track *Changes* by **2pac** is well emphasised by the here presented chordogram, whereas the chord progression unfortunately does not appear so clearly, as the chords are generally adequately detected but their transitions from one to the other are somewhat unclear.
+
+### Conclusions and contribution 
+
+The analysis conducted by this portfolio wanted to identify the most remarkable differences between 90's Hip Hop and today's Hip Hop, in order to be able to say with a scientific-driven approach how this music genre has changed in 25-30 years by using  music information retrieval and audio-mining tools. 
+
+It can be deduced from this set of analyses that even if many changes have occured, as the increasing massive deployment of audio plugins and processors that have revolutionized the sound of Hip Hop in its timbre features (which have become much more complex), have greatly reduced the use of spoken words and have further developed the use of sampling. In addition, the sharp tempo acceleration of today's Hip Hop is another trend to be carefully observed. 
+
+However, it has been observed also that today's Hip Hop and 90's Hip Hop share many characteristics, as the former is simply an evolution of the latter. This can be assumed for instance by looking at the costant low loudness range of Hip Hop across the years. 
+
+By keeping in mind the above-mentioned findings of this portfolio, the here presented project leaves room for further studies, which by looking at a greater detail the timbre features of the two time period and by analysing their temporal features (that have been not analysed because of the costraints presented by the machine used for this project) could gain a better insight into the evolution of Hip Hop sound. 
