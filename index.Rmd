@@ -432,20 +432,6 @@ HeGotGame %>%
             fill = value)) + 
     geom_tile() +
     labs(x = 'Time (s)', y = NULL, fill = 'Magnitude') +
-    scale_x_continuous(
-        breaks = c(0, 59, 79, 128, 148, 158, 197, 217, 286), 
-        labels = 
-            c(
-                'V1',
-                'Ch1',
-                'V2',
-                'Ch2',
-                'V3',
-                'Or.Ch',
-                'Tr',
-                'Outro',
-                ''),
-        ) +
         ggtitle("He Got Game") +
         theme_minimal() ->p1
 ```
@@ -466,22 +452,6 @@ ForWhat %>%
             fill = value)) + 
     geom_tile() +
     labs(x = 'Time (s)', y = NULL, fill = 'Magnitude') +  
-    scale_x_continuous(
-        breaks = c(0, 28, 34, 63, 69, 78, 97, 102, 112, 131, 153), 
-        labels = 
-            c(
-                'V1',
-                'Ch1',
-                'V2',
-                'Ch2',
-                'Tr1',
-                'V3',
-                'Ch3',
-                'Solo' ,
-                'Tr2' ,
-                'Outro' , 
-              ''),
-        ) +
     ggtitle("For What it's Worth") +
     theme_minimal() ->p2
 ```
@@ -520,15 +490,6 @@ Endless %>%
             fill = value)) + 
     geom_tile() +
     labs(x = 'Time (s)', y = NULL, fill = 'Magnitude') +
-    scale_x_continuous(
-        breaks = c(0, 14, 215, 237), 
-        labels = 
-            c(
-                'Intro',
-                'V1',
-                'Outro',
-                ''),
-        ) +
     ggtitle("Endless Summer Freestyle") +
     theme_minimal() ->p3
 ```
@@ -549,19 +510,6 @@ Neky_Hokey %>%
             fill = value)) + 
     geom_tile() +
     labs(x = 'Time (s)', y = NULL, fill = 'Magnitude') +
-    scale_x_continuous(
-        breaks = c(0, 7,  40, 56, 92, 103, 125, 141), 
-        labels = 
-            c(
-                'Intro',
-                'Ch1',
-                'V1',
-                'Solo',
-                'V2',
-                'Ch2',
-                'Outro',
-              ''),
-        ) +
     ggtitle("Neki-Hokey") +
     theme_minimal() ->p4
 ```    
