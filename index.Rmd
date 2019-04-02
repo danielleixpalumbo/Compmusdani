@@ -404,6 +404,8 @@ Dre %>%
 grid.arrange(p10, p11, ncol = 2)
 ```
 
+***
+
 So to continue the analysis of the most remarkable differences distinguishing today's Hip Hop from 90's Hip Hop in terms of timbre, two cepstogram of the tracks *Bet* by **Octavian feat Skepta and Michael Phantom** from today's Hip Hop and *What's the Difference* by **Dr.Dre feat Eminem and Xzibit** are provided. 
 
 The two cepstograms reflect the information provided by the summary of Spotify's timbre coefficients at the playlist level, with a high spread of energy across the coefficients 8 and 10 and a much lower one across coefficient 7 for the 90's track *What's the difference*, whereas *Bet* has pretty high energy distribution across these three coefficients. As it is clear from the two cepstograms and also from the listening tests, the spectral information contained in *Bet* seem much richer compared to those of *What's the Difference*, as the today's track has energy spread across almost all the timbre coefficients, whereas the distribution of energy of *What's the Difference* is almost non existent in certain coefficients. 
@@ -738,30 +740,7 @@ Tupac %>%
     scale_fill_viridis_c(option = 'E', guide = 'none') +
     theme_minimal() +
     labs(x = 'Time (s)', y = '') +
-    theme_minimal() ->p5
-```
-
-```{r}
-Tupac_Chroma <- 
-    get_tidy_audio_analysis('7aRGb3vZGMLNpK2PEdUjdA') %>% 
-    select(segments) %>% unnest(segments) %>% 
-    select(start, duration, pitches)
-Tupac_Chroma %>% 
-    mutate(pitches = map(pitches, compmus_normalise, 'manhattan')) %>% 
-    compmus_gather_chroma %>% 
-    ggplot(
-        aes(
-            x = start + duration / 2, 
-            width = duration, 
-            y = pitch_class, 
-            fill = value)) + 
-    geom_tile() +
-    labs(x = 'Time (s)', y = NULL, fill = 'Magnitude') +
-        theme_minimal() ->p6
-```
-
-```{r}
-grid.arrange(p5, p6, ncol = 2)
+    theme_minimal() 
 ```
 
 ***
